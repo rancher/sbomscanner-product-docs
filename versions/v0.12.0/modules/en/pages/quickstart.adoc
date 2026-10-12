@@ -1,7 +1,7 @@
 include::partial$variables.adoc[]
 
 = SBOMscanner Quick Start
-:revdate: 2026-09-21
+:revdate: 2026-10-09
 :page-revdate: {revdate}
 
 Welcome to the SBOMscanner Quick Start!
@@ -144,6 +144,7 @@ sbomscanner           sbomscanner-worker-d9d68c5c-tlpgm             1/1     Runn
 At this point, your SBOMBastic deployment is up and running
 successfully. You’re now ready to begin scanning images and generating
 reports!
+
 == Run a Scan
 
 In this section, you’ll learn how to create a registry source and
@@ -174,7 +175,7 @@ spec:
 kubectl apply -f registry.yaml
 ----
 
-=== Prepare a `scan-job.yaml`
+=== Prepare a `scanjob.yaml` file
 
 The `ScanJob` CR tells SBOMscanner which registry to scan.
 
