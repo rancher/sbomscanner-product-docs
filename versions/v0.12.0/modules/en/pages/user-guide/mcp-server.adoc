@@ -1,7 +1,7 @@
 include::partial$variables.adoc[]
 
 = MCP Server (Experimental)
-:revdate: 2026-06-15
+:revdate: 2026-10-09
 :page-revdate: {revdate}
 :description: Enable and use the experimental {sboms-name} MCP server.
 
@@ -64,8 +64,11 @@ kubectl apply -f mcp-auth-secret.yaml
 
 [source,bash]
 ----
-helm upgrade --install sbomscanner sbomscanner/sbomscanner \
+helm upgrade --install sbomscanner \
+  oci://dp.apps.rancher.io/charts/suse-security-vulnerability-scanner \
+  --version 0.12.1 \
   --namespace sbomscanner \
+  --set 'global.imagePullSecrets={application-collection}' \
   --set mcp.enabled=true \
   --set mcp.auth.secretName=sbomscanner-mcp-auth
 ----
@@ -125,7 +128,7 @@ To reach the MCP server from your local machine, forward the in-cluster Service:
 
 [source,bash]
 ----
-kubectl port-forward -n sbomscanner svc/sbomscanner-mcp 8222:8222
+kubectl port-forward -n sbomscanner svc/sbomscanner-ssvs-mcp 8222:8222
 ----
 
 The MCP endpoint is then available at `https://localhost:8222/mcp` (or `http://localhost:8222/mcp` if TLS is disabled).
@@ -216,8 +219,11 @@ Liz does not currently support TLS for external MCP connections. The MCP server 
 +
 [source,bash]
 ----
-helm upgrade --install sbomscanner sbomscanner/sbomscanner \
+helm upgrade --install sbomscanner \
+  oci://dp.apps.rancher.io/charts/suse-security-vulnerability-scanner \
+  --version 0.12.1 \
   --namespace sbomscanner \
+  --set 'global.imagePullSecrets={application-collection}' \
   --set mcp.enabled=true \
   --set mcp.disableTLS=true \
   --set mcp.auth.secretName=sbomscanner-mcp-auth
@@ -255,7 +261,7 @@ spec:
   builtIn: false
   displayName: SBOMscanner
   enabled: true
-  mcpURL: http://sbomscanner-mcp.<namespace>.svc.cluster.local:8222
+  mcpURL: http://sbomscanner-ssvs-mcp.<namespace>.svc.cluster.local:8222
   description: |
     SBOMscanner security agent for container image vulnerability management.
     Example prompts:
@@ -381,8 +387,11 @@ Enable it with:
 
 [source,bash]
 ----
-helm upgrade sbomscanner sbomscanner/sbomscanner \
+helm upgrade sbomscanner \
+  oci://dp.apps.rancher.io/charts/suse-security-vulnerability-scanner \
+  --version 0.12.1 \
   --namespace sbomscanner \
+  --reuse-values \
   --set mcp.readOnly=true
 ----
 
@@ -402,8 +411,11 @@ To disable TLS (for development, or when TLS is terminated externally by an Ingr
 
 [source,bash]
 ----
-helm upgrade sbomscanner sbomscanner/sbomscanner \
+helm upgrade sbomscanner \
+  oci://dp.apps.rancher.io/charts/suse-security-vulnerability-scanner \
+  --version 0.12.1 \
   --namespace sbomscanner \
+  --reuse-values \
   --set mcp.disableTLS=true
 ----
 

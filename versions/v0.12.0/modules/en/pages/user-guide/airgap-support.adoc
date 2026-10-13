@@ -1,7 +1,7 @@
 include::partial$variables.adoc[]
 
 = Air Gap Support
-:revdate: 2026-06-15
+:revdate: 2026-10-09
 :page-revdate: {revdate}
 :description: Run {sboms-name} in air-gapped environments with mirrored dependencies.
 
@@ -17,18 +17,22 @@ These external sources can be self-hosted in your private infrastructure to make
 
 == Self-Hosting Vulnerability Databases
 
-The following Vulnerability Databases are packaged as OCI images, allowing you to host them in your own registry:
+The Vulnerability Databases are packaged as OCI images, allowing you to host them in your own registry. By default, {sboms-name} pulls them from the SUSE registry:
 
-* https://github.com/aquasecurity/trivy-db/pkgs/container/trivy-db[`trivy-db`]
-* https://github.com/aquasecurity/trivy-java-db/pkgs/container/trivy-java-db[`trivy-java-db`]
+* `registry.rancher.com/suse-security/vulnerability-scanner/trivy-db:2`
+* `registry.rancher.com/suse-security/vulnerability-scanner/trivy-java-db:1`
 
 Once mirrored in your own OCI registry, you can install {sboms-name} to point to them:
 
 [source,shell]
 ----
-helm install sbomscanner ./chart \
-    --set worker.trivyDBRepository="yourlocalregistry.example/sbomscanner/trivy-db" \
-    --set worker.trivyJavaDBRepository="yourlocalregistry.example/sbomscanner/trivy-java-db"
+helm install sbomscanner \
+    oci://dp.apps.rancher.io/charts/suse-security-vulnerability-scanner \
+    --version 0.12.1 \
+    --namespace sbomscanner \
+    --set 'global.imagePullSecrets={application-collection}' \
+    --set worker.trivyDBRepository="yourlocalregistry.example/suse-security/vulnerability-scanner/trivy-db:2" \
+    --set worker.trivyJavaDBRepository="yourlocalregistry.example/suse-security/vulnerability-scanner/trivy-java-db:1"
 ----
 
 [#self-hosting-vex-hub]
@@ -44,7 +48,11 @@ By default, {sboms-name} seeds two `VEXHub` resources pointing to the public `gi
 
 [source,shell]
 ----
-helm install sbomscanner ./chart \
+helm install sbomscanner \
+    oci://dp.apps.rancher.io/charts/suse-security-vulnerability-scanner \
+    --version 0.12.1 \
+    --namespace sbomscanner \
+    --set 'global.imagePullSecrets={application-collection}' \
     --set controller.defaultVEXHubResources=false
 ----
 

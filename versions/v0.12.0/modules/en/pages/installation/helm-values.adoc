@@ -1,11 +1,16 @@
 include::partial$variables.adoc[]
 
 = Helm Values Configuration
-:revdate: 2026-06-15
+:revdate: 2026-10-09
 :page-revdate: {revdate}
 :description: Configure {sboms-name} Helm chart values for deployment and storage.
 
 This document describes the available configuration options for the {sboms-name} Helm chart.
+
+The examples in this document assume that you have logged in to the SUSE
+Application Collection and created the `application-collection` image pull
+secret in the `sbomscanner` namespace, as described in the
+xref:../quickstart.adoc[Quick Start].
 
 You can customize these values in two ways:
 
@@ -14,7 +19,12 @@ You can customize these values in two ways:
 
 [source,bash]
 ----
-helm install sbomscanner ./chart -f my-values.yaml
+helm install sbomscanner \
+  oci://dp.apps.rancher.io/charts/suse-security-vulnerability-scanner \
+  --version 0.12.1 \
+  --namespace sbomscanner \
+  --set 'global.imagePullSecrets={application-collection}' \
+  -f my-values.yaml
 ----
 
 [arabic, start=2]
@@ -22,7 +32,13 @@ helm install sbomscanner ./chart -f my-values.yaml
 
 [source,bash]
 ----
-helm install sbomscanner ./chart --set controller.replicas=5 --set storage.postgres.cnpg.instances=5
+helm install sbomscanner \
+  oci://dp.apps.rancher.io/charts/suse-security-vulnerability-scanner \
+  --version 0.12.1 \
+  --namespace sbomscanner \
+  --set 'global.imagePullSecrets={application-collection}' \
+  --set controller.replicas=5 \
+  --set storage.postgres.cnpg.instances=5
 ----
 
 For more details on customizing Helm charts, see the https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing[Helm documentation].
