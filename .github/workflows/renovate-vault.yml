@@ -2,14 +2,6 @@ name: Renovate
 on:
   workflow_dispatch:
     inputs:
-      logLevel:
-        description: "Override default log level"
-        required: false
-        default: info
-        type: choice
-        options:
-          - info
-          - debug
       overrideSchedule:
         description: "Override all schedules"
         required: false
@@ -31,11 +23,18 @@ on:
         required: false
         default: ".github/renovate.json"
         type: string
-      minimumReleaseAge:
-        description: "Override minimumReleaseAge for a one-time run (e.g., '0 days' to disable delay)"
+      refreshGroup:
+        description: "Ignore minimumReleaseAge for the selected scope in this run only, so those updates need no waiting period. Empty keeps the configured release ages. Scheduled runs are unaffected"
         required: false
-        default: "null"
-        type: string
+        default: ""
+        type: choice
+        options:
+          - ""
+          - all
+          - go
+          - kubernetes
+          - security
+          - github-actions
 
   schedule:
     - cron: '30 6 * * 1-5'
@@ -48,15 +47,14 @@ jobs:
       contents: read
       id-token: write # Required for Vault OIDC authentication.
     # https://github.com/rancher/renovate-config/releases
-    uses: rancher/renovate-config/.github/workflows/renovate-vault.yml@b20e059a3642b4f6add6f9db276349daca5ea54e # v1.0.10
+    uses: rancher/renovate-config/.github/workflows/renovate-vault.yml@ef1355071eeda6bbcf3455f943558cd538a8cd81 # v1.0.15
     # Note: github.event.inputs.<name> with '||' fallbacks is used across all inputs
     # so that scheduled cron runs (where github.event.inputs is null) safely default.
     with:
       configMigration: ${{ github.event.inputs.configMigration || 'true' }}
-      logLevel: ${{ github.event.inputs.logLevel || 'info' }}
       overrideSchedule: ${{ github.event.inputs.overrideSchedule || 'false' }}
       renovateConfig: ${{ github.event.inputs.renovateConfig || '.github/renovate.json' }}
-      minimumReleaseAge: ${{ github.event.inputs.minimumReleaseAge || 'null' }}
+      refreshGroup: ${{ github.event.inputs.refreshGroup || '' }}
     secrets:
       # Optional: RENOVATE_FORK_GH_TOKEN allows this action to run on repository forks where
       # Vault/App token generation is unavailable. Defaulting to '' allows the caller
