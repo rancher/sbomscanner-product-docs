@@ -1,7 +1,7 @@
 include::partial$variables.adoc[]
 
 = Scanning Workloads
-:revdate: 2026-06-15
+:revdate: 2026-10-09
 :page-revdate: {revdate}
 :description: Configure workload scanning and understand workload vulnerability reports.
 
@@ -209,15 +209,16 @@ kubectl get workloadscanreports -n prod
 
 [source,text]
 ----
-NAME               AGE
-deployment-nginx   2m
+NAME                                              NAMESPACE   KIND         WORKLOAD   CONTAINERS   AGE
+deployment-f903dbc0-967c-4044-af7b-0053a2627564   prod        Deployment   nginx      1            2026-10-09T18:38:32Z
 ----
 
-Retrieve a report:
+The report is named after the kind and the UID of the workload. Retrieve a
+report, replacing `<uid>` with the UID shown in the previous output:
 
 [source,bash]
 ----
-kubectl get workloadscanreport deployment-nginx -n prod -o yaml
+kubectl get workloadscanreport deployment-<uid> -n prod -o yaml
 ----
 
 [source,yaml]
@@ -225,7 +226,7 @@ kubectl get workloadscanreport deployment-nginx -n prod -o yaml
 apiVersion: storage.sbomscanner.kubewarden.io/v1alpha1
 kind: WorkloadScanReport
 metadata:
-  name: deployment-nginx
+  name: deployment-<uid>
   namespace: prod
   ownerReferences:
     - apiVersion: apps/v1
