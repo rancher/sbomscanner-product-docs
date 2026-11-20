@@ -1,7 +1,7 @@
 include::partial$variables.adoc[]
 
 = SBOMscanner Quick Start
-:revdate: 2026-09-21
+:revdate: 2026-10-09
 :page-revdate: {revdate}
 
 Welcome to the SBOMscanner Quick Start!
@@ -24,23 +24,49 @@ https://kubernetes.io/docs/concepts/storage/storage-classes/#default-storageclas
 Storage Class] defined inside of the cluster
 * `helm` installed locally
 * `kubectl` installed locally
+* Credentials for the https://apps.rancher.io[SUSE Application Collection]
 * `cert-manager` installed in the cluster
 * `CloudNativePG` installed in the cluster
 
-=== Install cert-manager
+=== Authenticate to the SUSE Application Collection
 
-To install cert-manager, you can run the following commands:
+The {sboms-name} Helm chart, its dependencies, and all their container
+images are distributed through the SUSE Application Collection. See the
+https://docs.apps.rancher.io/get-started/authentication/[Application Collection
+authentication documentation] for how to obtain your credentials.
+
+Log in to the registry with Helm:
 
 [source,bash]
 ----
-helm repo add jetstack https://charts.jetstack.io
+helm registry login dp.apps.rancher.io \
+  --username <your-username> \
+  --password <your-token>
+----
 
-helm repo update
+The cluster also needs credentials to pull the container images. Each of
+the following sections creates an image pull secret named
+`application-collection` in the namespace where the chart is installed.
 
-helm install cert-manager jetstack/cert-manager \
+=== Install cert-manager
+
+To install cert-manager from the SUSE Application Collection, run the
+following commands:
+
+[source,bash]
+----
+kubectl create namespace cert-manager
+
+kubectl create secret docker-registry application-collection \
   --namespace cert-manager \
-  --create-namespace \
+  --docker-server=dp.apps.rancher.io \
+  --docker-username=<your-username> \
+  --docker-password=<your-token>
+
+helm install cert-manager oci://dp.apps.rancher.io/charts/cert-manager \
+  --namespace cert-manager \
   --set crds.enabled=true \
+  --set 'global.imagePullSecrets={application-collection}' \
   --wait
 ----
 
@@ -54,17 +80,23 @@ documentation]
 
 === Install CloudNativePG
 
-To install CloudNativePG, you can run the following commands:
+To install CloudNativePG from the SUSE Application Collection, run the
+following commands:
 
 [source,bash]
 ----
-helm repo add cnpg https://cloudnative-pg.github.io/charts
-helm repo update
-helm install cnpg \
+kubectl create namespace cnpg-system
+
+kubectl create secret docker-registry application-collection \
   --namespace cnpg-system \
-  --create-namespace \
-  --wait \
-  cnpg/cloudnative-pg
+  --docker-server=dp.apps.rancher.io \
+  --docker-username=<your-username> \
+  --docker-password=<your-token>
+
+helm install cnpg oci://dp.apps.rancher.io/charts/cloudnative-pg \
+  --namespace cnpg-system \
+  --set 'global.imagePullSecrets={application-collection}' \
+  --wait
 ----
 
 To customize the CloudNativePG installation, refer to
@@ -81,13 +113,24 @@ and running:
 
 === Install the Helm chart
 
+Install the `suse-security-vulnerability-scanner` Helm chart from the
+SUSE Application Collection:
+
 [source,bash]
 ----
-helm repo add kubewarden https://charts.kubewarden.io
-helm repo update
-helm install sbomscanner kubewarden/sbomscanner \
+kubectl create namespace sbomscanner
+
+kubectl create secret docker-registry application-collection \
   --namespace sbomscanner \
-  --create-namespace \
+  --docker-server=dp.apps.rancher.io \
+  --docker-username=<your-username> \
+  --docker-password=<your-token>
+
+helm install sbomscanner \
+  oci://dp.apps.rancher.io/charts/suse-security-vulnerability-scanner \
+  --version 0.12.1 \
+  --namespace sbomscanner \
+  --set 'global.imagePullSecrets={application-collection}' \
   --wait
 ----
 
@@ -96,13 +139,16 @@ helm install sbomscanner kubewarden/sbomscanner \
 
 By default, the installation of SBOMscanner is configured to be highly
 available. If you want to save on resources, you can reduce the number
-of replicas to the minimum:
+of replicas to the minimum by running the following `helm install`
+command instead of the previous one:
 
 [source,bash]
 ----
-helm install sbomscanner kubewarden/sbomscanner \
+helm install sbomscanner \
+  oci://dp.apps.rancher.io/charts/suse-security-vulnerability-scanner \
+  --version 0.12.1 \
   --namespace sbomscanner \
-  --create-namespace \
+  --set 'global.imagePullSecrets={application-collection}' \
   --set controller.replicas=1 \
   --set storage.replicas=1 \
   --set storage.postgres.cnpg.instances=1 \
@@ -127,16 +173,23 @@ Example output:
 
 [source,bash]
 ----
-sbomscanner           sbomscanner-controller-7f568c88dc-bmjgs       1/1     Running
-sbomscanner           sbomscanner-controller-7f568c88dc-gcgbn       1/1     Running
-sbomscanner           sbomscanner-controller-7f568c88dc-q7hbh       1/1     Running
-sbomscanner           sbomscanner-nats-0                            2/2     Running
-sbomscanner           sbomscanner-nats-1                            2/2     Running
-sbomscanner           sbomscanner-nats-2                            2/2     Running
-sbomscanner           sbomscanner-storage-5f596cd8f8-4t7z8          1/1     Running
-sbomscanner           sbomscanner-worker-d9d68c5c-5dtck             1/1     Running
-sbomscanner           sbomscanner-worker-d9d68c5c-qcp7n             1/1     Running
-sbomscanner           sbomscanner-worker-d9d68c5c-tlpgm             1/1     Running
+NAME                                           READY   STATUS    RESTARTS   AGE
+sbomscanner-nats-0                             2/2     Running   0          81s
+sbomscanner-nats-1                             2/2     Running   0          81s
+sbomscanner-nats-2                             2/2     Running   0          81s
+sbomscanner-ssvs-cnpg-cluster-1                1/1     Running   0          68s
+sbomscanner-ssvs-cnpg-cluster-2                1/1     Running   0          38s
+sbomscanner-ssvs-cnpg-cluster-3                1/1     Running   0          15s
+sbomscanner-ssvs-controller-6c75597864-d8nb4   1/1     Running   0          81s
+sbomscanner-ssvs-controller-6c75597864-dp5xj   1/1     Running   0          81s
+sbomscanner-ssvs-controller-6c75597864-mmdpf   1/1     Running   0          81s
+sbomscanner-ssvs-storage-5dff4c9549-gdnrh      1/1     Running   0          81s
+sbomscanner-ssvs-storage-5dff4c9549-gxfbn      1/1     Running   0          81s
+sbomscanner-ssvs-storage-5dff4c9549-mz5wv      1/1     Running   0          81s
+sbomscanner-ssvs-worker-66dcd59694-92qmc       1/1     Running   0          81s
+sbomscanner-ssvs-worker-66dcd59694-dl85j       1/1     Running   0          81s
+sbomscanner-ssvs-worker-66dcd59694-vzhqw       1/1     Running   0          81s
+sbomscanner-ssvs-worker-node-66vb7             1/1     Running   0          81s
 ----
 
 === Summary

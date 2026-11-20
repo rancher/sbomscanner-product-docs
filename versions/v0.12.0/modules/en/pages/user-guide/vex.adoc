@@ -1,7 +1,7 @@
 include::partial$variables.adoc[]
 
 = VEX Support
-:revdate: 2026-06-15
+:revdate: 2026-10-09
 :page-revdate: {revdate}
 :description: Use VEX hubs to enrich {sboms-name} vulnerability findings.
 
@@ -21,7 +21,7 @@ If you want to know more about VEX Hub, take a look https://github.com/aquasecur
 
 In order to scan `Registries` using VEX, you just have to create (one, or more) `VEXHub` resources.
 
-Here's an example of `VEXHub` resource (you can find it under https://github.com/kubewarden/sbomscanner/blob/main/examples/vexhub.yaml[`examples/vexhub.yaml`]:
+Here's an example of `VEXHub` resource. Save it as `vexhub.yaml`:
 
 [source,yaml]
 ----
@@ -38,10 +38,10 @@ Apply the resource with:
 
 [source,bash]
 ----
-kubectl apply -f examples/vexhub.yaml
+kubectl apply -f vexhub.yaml
 ----
 
-Then, run the scan applying a https://github.com/kubewarden/sbomscanner/blob/main/examples/scanjob.yaml[`ScanJob`] configured to scan the desired registry.
+Then, run the scan applying a `ScanJob` configured to scan the desired registry, as described in the xref:../quickstart.adoc[Quick Start].
 
 {sboms-name} will automatically detect the presence of `VEXHub` resources and will include them in the scan.
 

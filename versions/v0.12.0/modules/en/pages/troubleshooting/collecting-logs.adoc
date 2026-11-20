@@ -1,7 +1,7 @@
 include::partial$variables.adoc[]
 
 = Collecting logs for debugging
-:revdate: 2026-06-15
+:revdate: 2026-10-09
 :page-revdate: {revdate}
 :description: Collect {sboms-name} logs and support bundles for troubleshooting.
 
@@ -18,11 +18,16 @@ The `sbomscanner-debug.sh` script additionally requires:
 
 == Install or upgrade an existing installation with debug logging activated
 
+The following command requires the `application-collection` image pull
+secret in the `sbomscanner` namespace, as described in the
+xref:../quickstart.adoc[Quick Start].
+
 [source,bash]
 ----
-helm repo add kubewarden https://charts.kubewarden.io
-helm repo update
-helm upgrade --install sbomscanner kubewarden/sbomscanner \
+helm upgrade --install sbomscanner \
+  oci://dp.apps.rancher.io/charts/suse-security-vulnerability-scanner \
+  --version 0.12.1 \
+  --set 'global.imagePullSecrets={application-collection}' \
   --set=controller.logLevel=debug \
   --set=storage.logLevel=debug \
   --set=worker.logLevel=debug \
@@ -48,8 +53,8 @@ Example output:
   ✅ Found {sboms-name} Helm release
   Release name       sbomscanner
   Namespace          sbomscanner
-  Chart              sbomscanner-0.2.0
-  App version        v0.2.0
+  Chart              suse-security-vulnerability-scanner-0.12.1
+  App version        0.12.1
 
 == Deployments ==
   ✅ deployment 'sbomscanner-controller' running, all pods ready.
@@ -76,7 +81,7 @@ If your release lives in a non-standard namespace and discovery fails, you can s
 ⚠️ The bundle may contain sensitive data. Pod logs include container registry names and URIs, and by default the bundle also includes the rendered Helm values and manifest, which can contain credentials depending on how the chart was configured (for example image pull secrets, registry auth, or any value passed via `--set`). Review the bundle contents before sharing.
 ====
 
-Using https://github.com/kubewarden/sbomscanner/blob/main/hack/sbomscanner-debug.sh[the script found in the sbomscanner repository]:
+Using https://github.com/kubewarden/sbomscanner/blob/v0.12.1/hack/sbomscanner-debug.sh[the script found in the sbomscanner repository]:
 
 [source,bash]
 ----
