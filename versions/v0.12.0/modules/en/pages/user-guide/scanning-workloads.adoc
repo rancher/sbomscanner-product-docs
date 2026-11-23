@@ -1,7 +1,7 @@
 include::partial$variables.adoc[]
 
 = Scanning Workloads
-:revdate: 2026-06-15
+:revdate: 2026-10-09
 :page-revdate: {revdate}
 :description: Configure workload scanning and understand workload vulnerability reports.
 
@@ -29,7 +29,7 @@ Any other controller kind that owns a pod is also supported and reported under i
 
 === Default behavior
 
-The WorkloadScan reconcilers are enabled by default when installing {sboms-name} via the Helm chart. Workload scanning becomes active once you create a `WorkloadScanConfiguration` resource. A sample configuration is available in the https://github.com/kubewarden/sbomscanner/blob/main/examples/workloadscanconfiguration.yaml[examples folder].
+The WorkloadScan reconcilers are enabled by default when installing {sboms-name} via the Helm chart. Workload scanning becomes active once you create a `WorkloadScanConfiguration` resource, as described in <<_configuration,Configuration>>.
 
 == Configuration
 
@@ -39,13 +39,7 @@ To activate workload scanning after installation, create the configuration:
 
 [source,bash]
 ----
-kubectl apply -f https://raw.githubusercontent.com/kubewarden/sbomscanner/main/examples/workloadscanconfiguration.yaml
-----
-
-Or create your own configuration:
-
-[source,yaml]
-----
+kubectl apply -f - <<EOF
 apiVersion: sbomscanner.kubewarden.io/v1alpha1
 kind: WorkloadScanConfiguration
 metadata:
@@ -62,7 +56,11 @@ spec:
       os: linux
     - arch: arm64
       os: linux
+EOF
 ----
+
+Adjust the values to your needs. The following table describes all the
+available fields.
 
 === Fields
 
