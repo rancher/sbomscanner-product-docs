@@ -197,6 +197,7 @@ sbomscanner-ssvs-worker-node-66vb7             1/1     Running   0          81s
 At this point, your SBOMBastic deployment is up and running
 successfully. You’re now ready to begin scanning images and generating
 reports!
+
 == Run a Scan
 
 In this section, you’ll learn how to create a registry source and
@@ -227,7 +228,7 @@ spec:
 kubectl apply -f registry.yaml
 ----
 
-=== Prepare a `scan-job.yaml`
+=== Prepare a `scanjob.yaml` file
 
 The `ScanJob` CR tells SBOMscanner which registry to scan.
 
